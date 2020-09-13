@@ -1,9 +1,9 @@
 <template>
   <div class="wrapper">
-    <div></div>
+    <div id="settingPanel">123</div>
     <h1 id="mytime">{{str}}</h1>
     <!-- <input id="mytime" type="text" name="" value="显示时间"> -->
-    <div>
+    <div id="controlPanel">
       <button id="stop" name="button" @click="stop">暂停</button>
       <button id="start" name="button" @click="start">开始</button>
       <button id="reset" name="button" @click="reset">重置</button>
@@ -14,49 +14,60 @@
 export default {
   data() {
     return {
-      h: 0, //定义时，分，秒，毫秒并初始化为0；
+      default_h: 0,
+      default_m: 8,
+      default_s: 0,
+      default_ms: 0,
+      h: 0,
       m: 0,
       s: 0,
       ms: 0,
-      time: 0,
-      str: "00:00:00",
-      mytime: "",
+      time: "Timer",
     };
   },
-  methods: {
-    timer() {
-      //定义计时函数
-      this.ms = this.ms + 50; //毫秒
-      if (this.ms >= 1000) {
-        this.ms = 0;
-        this.s = this.s + 1; //秒
-      }
-      if (this.s >= 60) {
-        this.s = 0;
-        this.m = this.m + 1; //分钟
-      }
-      if (this.m >= 60) {
-        this.m = 0;
-        this.h = this.h + 1; //小时
-      }
-      this.str =
+  computed: {
+    str() {
+      let nowTime =
         this.toDub(this.h) +
         ":" +
         this.toDub(this.m) +
         ":" +
         this.toDub(this.s) +
-        "" /*+this.toDubms(this.ms)+"毫秒"*/;
-      // document.getElementById('mytime').innerHTML=h+"时"+m+"分"+s+"秒"+ms+"毫秒";
+        ""; /*+this.toDubms(this.ms)+"毫秒"*/
+      return nowTime;
+    },
+  },
+  methods: {
+    check() {
+      // 检查倒计时是是否结束
+    },
+    setDefault() {
+      this.h = this.default_h;
+      this.m = this.default_m;
+      this.s = this.default_s;
+      this.ms = this.default_ms;
+    },
+    timer() {
+      // 定义计时函数
+      this.ms = this.ms - 50; //毫秒
+      if (this.ms < 0) {
+        this.ms = 950;
+        this.s = this.s - 1; //秒
+      }
+      if (this.s < 0) {
+        this.s = 59;
+        this.m = this.m - 1; //分钟
+      }
+      if (this.m < 0) {
+        this.m = 59;
+        this.h = this.h - 1; //小时
+      }
     },
 
     reset() {
       //重置
       clearInterval(this.time);
-      this.h = 0;
-      this.m = 0;
-      this.s = 0;
-      this.ms = 0;
-      this.str = "00:00:00";
+      this.setDefault();
     },
 
     start() {
@@ -87,11 +98,22 @@ export default {
       }
     },
   },
-  //实例创建完成后调用，此阶段完成了数据的观测等，但尚未挂载，$el 还不可用。需要初始化处理一些数据时会比较有用
-  created: function () {},
+  // 实例创建完成后调用，此阶段完成了数据的观测等，但尚未挂载，$el 还不可用。需要初始化处理一些数据时会比较有用
+  created: function () {
+    console.log("Init Timer Settings ...");
+    this.setDefault();
+    console.log("Finished!");
+  },
 };
 </script>
 <style>
+#settingPanel {
+  background-color: #0962e9;
+  position: fixed;
+  top:20px;
+  left:20px;
+}
+
 #mytime {
   background: red;
   color: yellow;
@@ -103,12 +125,12 @@ export default {
   text-align: center;
   width: 100%;
   margin-top: 100px;
-  /* margin: 250px auto; */
 }
 body {
   background-color: red;
 }
 button {
+  width: 90px;
   padding: 0 20px;
   background-color: #2980ff;
   border: none;
@@ -127,7 +149,7 @@ button {
   -o-transition: all 0.15s ease;
   -ms-transition: all 0.15s ease;
   transition: all 0.15s ease;
-  margin-right:20px;
+  margin-right: 20px;
 }
 button:hover {
   background-color: #0962e9;
