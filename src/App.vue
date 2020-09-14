@@ -14,43 +14,72 @@
         <transition name="el-fade-in-linear">
           <div v-show="showSettings" class="transition-box">
             <el-row :gutter="10">
-              <el-col :span="8">
+              <el-col :span="6">
                 <span>小时</span>
               </el-col>
-              <el-col :span="8">
+              <el-col :span="6">
                 <span>分钟</span>
               </el-col>
-              <el-col :span="8">
+              <el-col :span="6">
                 <span>秒数</span>
+              </el-col>
+              <el-col :span="6">
+                <span>开关</span>
               </el-col>
             </el-row>
             <el-row :gutter="10">
-              <el-col :span="8">
-                <el-input-number v-model="default_h" @change="setDefault" controls-position="right" :min="0" :max="99"></el-input-number>
+              <el-col :span="6">
+                <el-input-number
+                  v-model="default_h"
+                  @change="setDefault"
+                  controls-position="right"
+                  :min="0"
+                  :max="99"
+                ></el-input-number>
               </el-col>
-              <el-col :span="8">
-                <el-input-number v-model="default_m" @change="setDefault" controls-position="right" :min="0" :max="59"></el-input-number>
+              <el-col :span="6">
+                <el-input-number
+                  v-model="default_m"
+                  @change="setDefault"
+                  controls-position="right"
+                  :min="0"
+                  :max="59"
+                ></el-input-number>
               </el-col>
-              <el-col :span="8">
-                <el-input-number v-model="default_s" @change="setDefault" controls-position="right" :min="0" :max="59"></el-input-number>
+              <el-col :span="6">
+                <el-input-number
+                  v-model="default_s"
+                  @change="setDefault"
+                  controls-position="right"
+                  :min="0"
+                  :max="59"
+                ></el-input-number>
+              </el-col>
+              <el-col :span="6">
+                <span>显示毫秒</span>
+                <el-switch v-model="showMS" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
               </el-col>
             </el-row>
             <el-row :gutter="10" justify="space-between">
-              <el-col :span="12">
+              <el-col :span="9">
                 <el-button
                   class="preset-button"
                   type="danger"
                   icon="el-icon-data-board"
                   @click="preset1"
-                >述职论文</el-button>
+                >述职&论文</el-button>
               </el-col>
-              <el-col :span="12">
+              <el-col :span="9">
                 <el-button
                   class="preset-button"
                   type="danger"
                   icon="el-icon-s-comment"
                   @click="preset2"
-                >抽题答辩</el-button>
+                >抽题&答辩</el-button>
+              </el-col>
+              <el-col :span="6">
+                <span>自动开始</span>
+                <el-switch v-model="autoSt" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
               </el-col>
             </el-row>
           </div>
@@ -91,6 +120,8 @@ export default {
   data() {
     return {
       showSettings: false,
+      showMS: false,
+      autoSt: true,
       default_h: 0,
       default_m: 10,
       default_s: 0,
@@ -119,17 +150,18 @@ export default {
           this.toDub(this.s)
         );
       } else if (check_time_remain > 0) {
-        return (
-          this.toDub(this.m) +
-          ":" +
-          this.toDub(this.s) +
-          "." +
-          this.toDub(this.ms)
-        );
-        // this.toDubms(this.ms);
+        if (this.showMS) {
+          return (
+            this.toDub(this.m) +
+            ":" +
+            this.toDub(this.s) +
+            "." +
+            this.toDub(this.toDubms(this.ms))
+          );
+        } else {
+          return this.toDub(this.m) + ":" + this.toDub(this.s);
+        }
       } else {
-        this.pause();
-        this.timeup_notifier.play();
         return "计时结束";
       }
     },
@@ -138,8 +170,26 @@ export default {
     is_timer_started: {
       handler(newValue) {
         this.sw_pause = !newValue;
-        this.sw_start = newValue;
+        if (this.time_str != "计时结束") {
+          this.sw_start = newValue;
+          // console.log("watch!this.time_str", this.time_str);
+        }
         this.showSettings = false;
+      },
+      immediate: true,
+    },
+    time_str: {
+      handler(newValue) {
+        if (newValue == "计时结束") {
+          if (this.is_timer_started) {
+            this.pause();
+            this.timeup_notifier.play();
+          } else {
+            this.sw_start = true;
+          }
+        } else if (!this.is_timer_started) {
+          this.sw_start = false;
+        }
       },
       immediate: true,
     },
@@ -152,7 +202,7 @@ export default {
       this.default_ms = 0;
       this.setDefault();
       this.showSettings = false;
-      this.start();
+      if (this.autoSt) this.start();
     },
     preset2() {
       this.default_h = 0;
@@ -161,7 +211,7 @@ export default {
       this.default_ms = 0;
       this.setDefault();
       this.showSettings = false;
-      this.start();
+      if (this.autoSt) this.start();
     },
     checkClickLocation(clickFrom) {
       event.stopPropagation(); // 阻止点击穿透
@@ -180,10 +230,18 @@ export default {
     },
     timer() {
       // 定义计时函数
-      this.ms = this.ms - 1; //毫秒
-      if (this.ms < 0) {
-        this.ms = 95;
-        this.s = this.s - 1; //秒
+      if (!this.showMS) {
+        this.ms = this.ms + 1; //毫秒
+        if (this.ms >= 100) {
+          this.ms = 0;
+          this.s = this.s - 1; //秒
+        }
+      } else {
+        this.ms = this.ms - 1; //毫秒
+        if (this.ms < 0) {
+          this.ms = 99;
+          this.s = this.s - 1; //秒
+        }
       }
       if (this.s < 0) {
         this.s = 59;
@@ -210,6 +268,12 @@ export default {
       this.is_timer_started = false;
       clearInterval(this.timer_container);
     },
+    // timeup() {
+    //   this.is_timer_started = false;
+    //   clearInterval(this.timer_container);
+    //   this.sw_pause = true;
+    //   this.sw_start = true;
+    // },
     toDub(n) {
       //补0操作
       if (n < 10) {
@@ -219,11 +283,9 @@ export default {
       }
     },
     toDubms(n) {
-      //给毫秒补0操作
-      if (n < 10) {
-        return "00" + n;
-      } else if (n < 100) {
-        return "0" + n;
+      //给毫秒补位操作
+      if (!this.showMS) {
+        return 100 - n;
       } else {
         return n;
       }
@@ -231,6 +293,9 @@ export default {
   },
   created: function () {
     this.setDefault();
+  },
+  mounted: function () {
+    
   },
 };
 </script>
@@ -280,7 +345,7 @@ body {
 }
 .transition-box {
   margin-bottom: 10px;
-  width: 360px;
+  width: 480px;
   height: 160px;
   border-radius: 4px;
   background-color: #409eff;
