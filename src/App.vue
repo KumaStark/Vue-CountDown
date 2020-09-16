@@ -57,7 +57,11 @@
               </el-col>
               <el-col :span="6">
                 <span>显示毫秒</span>
-                <el-switch v-model="showMS" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+                <el-switch
+                  v-model="showMS"
+                  active-color="#13ce66"
+                  inactive-color="#ff4949"
+                ></el-switch>
               </el-col>
             </el-row>
             <el-row :gutter="10" justify="space-between">
@@ -67,7 +71,8 @@
                   type="danger"
                   icon="el-icon-data-board"
                   @click="preset1"
-                >述职&论文</el-button>
+                  >述职&论文</el-button
+                >
               </el-col>
               <el-col :span="9">
                 <el-button
@@ -75,11 +80,16 @@
                   type="danger"
                   icon="el-icon-s-comment"
                   @click="preset2"
-                >抽题&答辩</el-button>
+                  >抽题&答辩</el-button
+                >
               </el-col>
               <el-col :span="6">
                 <span>自动开始</span>
-                <el-switch v-model="autoSt" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+                <el-switch
+                  v-model="autoSt"
+                  active-color="#13ce66"
+                  inactive-color="#ff4949"
+                ></el-switch>
               </el-col>
             </el-row>
           </div>
@@ -94,21 +104,24 @@
             @click="pause"
             icon="el-icon-video-pause"
             :disabled="sw_pause"
-          >暂停</el-button>
+            >暂停</el-button
+          >
           <el-button
             type="danger"
             round
             @click="start"
             icon="el-icon-video-play"
             :disabled="sw_start"
-          >开始</el-button>
+            >开始</el-button
+          >
           <el-button
             type="danger"
             round
             @click="reset"
             icon="el-icon-refresh"
             :disabled="sw_reset"
-          >重置</el-button>
+            >重置</el-button
+          >
         </el-button-group>
       </div>
     </div>
@@ -268,12 +281,6 @@ export default {
       this.is_timer_started = false;
       clearInterval(this.timer_container);
     },
-    // timeup() {
-    //   this.is_timer_started = false;
-    //   clearInterval(this.timer_container);
-    //   this.sw_pause = true;
-    //   this.sw_start = true;
-    // },
     toDub(n) {
       //补0操作
       if (n < 10) {
@@ -294,9 +301,7 @@ export default {
   created: function () {
     this.setDefault();
   },
-  mounted: function () {
-    
-  },
+  mounted: function () {},
 };
 </script>
 <style>
@@ -312,7 +317,6 @@ export default {
   top: 20px;
   left: 20px;
 }
-
 #settingPanel {
   position: fixed;
   display: flex;
@@ -321,7 +325,6 @@ export default {
   top: 20px;
   left: 60px;
 }
-
 #counterString {
   background: red;
   color: yellow;
@@ -355,14 +358,12 @@ body {
   box-sizing: border-box;
   margin-right: 20px;
 }
-
 .el-row {
   margin-bottom: 10px;
 }
 :last-child {
   margin-bottom: 0;
 }
-
 .el-col {
   border-radius: 4px;
 }
